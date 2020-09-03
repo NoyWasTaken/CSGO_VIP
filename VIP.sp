@@ -1,5 +1,3 @@
- // TODO: finish code on line 295
-
 #include <sourcemod>
 #include <regex>
 #include <VIP>
