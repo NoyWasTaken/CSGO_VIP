@@ -29,6 +29,6 @@ public Action Event_PlayerSpawn(Event event, char[] name, bool dontBroadcast)
     if(VIP_IsPlayerVIP(iClient) && g_cvBonus.IntValue > 0)
     {
         SetEntityHealth(iClient, GetClientHealth(iClient) + g_cvBonus.IntValue);
-        PrintToChat("%s You spawned with health bonus of \x02%d \x01hp.", PREFIX, g_cvBonus.IntValue);
+        PrintToChat(iClient, "%s You spawned with health bonus of \x02%d \x01hp.", PREFIX, g_cvBonus.IntValue);
     }
 }

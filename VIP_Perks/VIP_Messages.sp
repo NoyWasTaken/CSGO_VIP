@@ -20,7 +20,7 @@ public void VIP_OnPlayerLoaded(int client)
     for (int i = 1; i <= MaxClients; i++)
     {
         if (IsClientInGame(i))
-            ShowHudText(i, 0, "VIP %N has connected", iClient);
+            ShowHudText(i, 0, "VIP %N has connected", client);
     }
 }
 
@@ -32,7 +32,7 @@ public void OnClientDisconnect(int client)
         for (int i = 1; i <= MaxClients; i++)
         {
             if (IsClientInGame(i))
-                ShowHudText(i, 0, "VIP %N has disconnected", iClient);
+                ShowHudText(i, 0, "VIP %N has disconnected", client);
         }
     }
 }
