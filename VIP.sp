@@ -1,4 +1,4 @@
-// TODO: option to add people by their steamid (offline adding)
+// TODO: option to add people by their steamid (offline adding), finish code on line 295
 
 #include <sourcemod>
 
@@ -286,6 +286,16 @@ public int Handler_ManageVIPs(Menu menu, MenuAction action, int client, int item
     }
 }
 
+public int Handler_ManageVIP(Menu menu, MenuAction action, int client, int itemNum)
+{
+    if(action == MenuAction_Cancel && itemNum == MenuCancel_ExitBack)
+    {
+        g_dbDatabase.Query(SQL_ManageVips, "SELECT * FROM `vips`", GetClientSerial(client));
+    } else if (action == MenuAction_Select) {
+        // continue this
+    }
+}
+
 /* */
 
 /* Functions */
@@ -422,15 +432,19 @@ public void SQL_FetchVIP(Database db, DBResultSet results, const char[] error, a
 
     if(results.FetchRow())
     {
-        Menu menu = new Menu(Handler_ManageVIP);
-
         char szAuth[32], szName[MAX_NAME_LENGTH];
         results.FetchString(0, szAuth, sizeof(szAuth));
         results.FetchString(1, szName, sizeof(szName));
 
-        menu.SetTitle("%s Manage VIP - Viewing \"%s\"\n ", PREFIX_MENU, szName);
+        int iExpiration = results.FetchInt(2);
+        char szTime[64];
+        FormatTime(szTime, sizeof(szTime), "%d/%m/%Y %R", iExpiration);
 
-        // continue this later
+        Menu menu = new Menu(Handler_ManageVIP);
+        menu.SetTitle("%s Manage VIP - Viewing \"%s\"\nExpire Date: %s\n ", PREFIX_MENU, szName, szTime);
+        menu.AddItem("remove", "Remove VIP");
+        menu.ExitBackButton = true;
+        menu.Display(client, MENU_TIME_FOREVER);
     }
 }
 
