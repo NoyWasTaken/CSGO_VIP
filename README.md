@@ -1,1 +1,1 @@
-# CSGO_VIP
+# [CS:GO] VIP System
