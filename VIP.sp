@@ -1,4 +1,4 @@
-// TODO: option to add people by their steamid (offline adding), finish code on line 295
+// TODO: finish code on line 295
 
 #include <sourcemod>
 
@@ -58,6 +58,7 @@ public void OnPluginStart()
     HookEvent("round_start", Event_RoundStart);
 
     RegAdminCmd("sm_vip", Command_VIP, ADMFLAG_ROOT, "VIP Management");
+    RegAdminCmd("sm_addvip", Command_AddVIP, ADMFLAG_ROOT, "This command is used to add a vip using steamid")
 
     if(g_bLate)
         for(int i = 1; i <= MaxClients; i++)if(IsClientInGame(i))OnClientPostAdminCheck(i);
@@ -95,6 +96,8 @@ public int Native_IsPlayerVIP(Handle plugin, int numParams)
 
 /* */
 
+/* Events */
+
 public void OnMapStart()
 {
     g_iRounds = 0;
@@ -120,11 +123,61 @@ public Action Event_RoundStart(Event event, char[] name, bool dontBroadcast)
     g_iRounds++;
 }
 
+/* */
+
 /* Commands */
 
 public Action Command_VIP(int client, int args)
 {
+    if(!client)
+    {
+        PrintToServer("This command is for in-game only.");
+        return Plugin_Handled;
+    }
+
     Menus_ShowMain(client);
+    return Plugin_Handled;
+}
+
+public Action Command_AddVIP(int client, int args)
+{
+    if(!client)
+    {
+        PrintToServer("This command is for in-game only.");
+        return Plugin_Handled;
+    }
+
+    if(args != 2)
+    {
+        ReplyToCommand(client, "%s Usage: sm_addvip <steamid> <days>", PREFIX);
+        return Plugin_Handled;
+    }
+
+    char szArg[32], szArg2[10];
+    GetCmdArg(1, szArg, sizeof(szArg));
+    GetCmdArg(2, szArg2, sizeof(szArg2));
+
+    Regex rSteam = new Regex("/^STEAM_[0-5]:[01]:\d+$/");
+
+    if(rSteam.Match(szArg) != 1)
+    {
+        delete rSteam;
+
+        ReplyToCommand(client, "%s Invalid steamid entered, please try again.", PREFIX);
+        return Plugin_Handled;
+    }
+
+    delete rSteam;
+    int iDuration = StringToInt(szArg2);
+    if(iDuration < 0)
+    {
+        ReplyToCommand(client, "%s Invalid amount of days entered, please try again.", PREFIX);
+        return Plugin_Handled;
+    }
+
+    SQL_AddOfflineVIP(szArg, iDuration);
+    ShowActivity2(client, PREFIX_ACTIVITY, "Gave a vip to \x02\"%s\" \x01for \x04%s \x01days.", szArg, addCommas(iDuration));
+
     return Plugin_Handled;
 }
 
@@ -385,6 +438,15 @@ void SQL_AddVIP(int client)
 
     char szQuery[512];
     FormatEx(szQuery, sizeof(szQuery), "INSERT INTO `vips` (`auth`, `name`, `expiration`) VALUES ('%s', '%s', %d)", g_aPlayers[iTarget].auth, g_aPlayers[iTarget].name, iExpiration);
+    g_dbDatabase.Query(SQL_CheckForErrors, szQuery);
+}
+
+void SQL_AddOfflineVIP(char[] auth, int duration)
+{
+    int iExpriation = GetTime() + (duration * DAY_TO_SECONDS);
+
+    char szQuery[512];
+    FormatEx(szQuery, sizeof(szQuery), "INSERT INTO `vips` (`auth`, `name`, `expiration`) VALUES ('%s', 'Added Offline', %d) ON DUPLICATE KEY UPDATE `expiration` = %d", auth, iExpiration, iExpiration);
     g_dbDatabase.Query(SQL_CheckForErrors, szQuery);
 }
 
