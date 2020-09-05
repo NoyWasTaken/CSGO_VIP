@@ -13,7 +13,16 @@ enum
 }
 
 char g_szPistols[][][] =  {
-	{ "weapon_usp_silencer", "USP-S" }
+	{ "weapon_usp_silencer", "USP-S" }, 
+	{ "weapon_glock", "Glock" }, 
+	{ "weapon_p250", "P250" }, 
+	{ "weapon_deagle", "Desert Eagle" }, 
+	{ "weapon_cz75a", "CZ75" }, 
+	{ "weapon_fiveseven", "Five-Seven" }, 
+	{ "weapon_revolver", "Revolver" }, 
+	{ "weapon_elite", "Dual Berettas" }, 
+	{ "weapon_hkp2000", "P2000" }, 
+	{ "weapon_tec9", "Tec-9" }, 
 };
 
 public Plugin myinfo = 
