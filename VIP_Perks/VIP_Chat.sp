@@ -1,5 +1,5 @@
  // TODO: add sql support
- 
+
 #include <sourcemod>
 #include <chat-processor>
 #include <VIP>
@@ -23,6 +23,8 @@ enum
 	ColorType_Messages
 }
 
+Database g_dbDatabase = null;
+
 char g_szColors[][][] = 
 {
 	{ "\x02", "Strong Red" }, 
@@ -39,6 +41,7 @@ char g_szColors[][][] =
 	{ "\x0E", "Pink" }
 };
 char g_szTag[MAXPLAYERS + 1][32];
+char g_szAuth[MAXPLAYERS + 1][32];
 
 int g_iColors[MAXPLAYERS + 1][COLOR_TYPES];
 
@@ -53,16 +56,26 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	SQL_MakeConnection();
+	
 	RegConsoleCmd("sm_tag", Command_Tag, "Change your chat tag");
 	RegConsoleCmd("sm_colors", Command_Colors, "Opens the colors menu");
 }
 
 public void VIP_OnPlayerLoaded(int client)
 {
+	if (!GetClientAuthId(client, AuthId_Steam2, g_szAuth[client], sizeof(g_szAuth)))
+	{
+		KickClient(client, "Verification problem, please reconnect");
+		return;
+	}
+	
 	for (int i = 0; i < COLOR_TYPES; i++)
 	g_iColors[client][i] = -1;
 	
 	g_szTag[client][0] = 0;
+	
+	SQL_LoadPlayer(client);
 }
 
 public Action Command_Tag(int client, int args)
@@ -167,4 +180,64 @@ public Action CP_OnChatMessage(int & author, ArrayList recipients, char[] flagst
 	}
 	
 	return Plugin_Continue;
-} 
+}
+
+/* Database */
+
+void SQL_MakeConnection()
+{
+	if (g_dbDatabase != null)
+		delete g_dbDatabase;
+	
+	char szError[512];
+	g_dbDatabase = SQL_Connect(DATABASE_ENTRY, true, szError, sizeof(szError));
+	if (g_dbDatabase == null)
+		SetFailState("Cannot connect to database error: %s", szError);
+	
+	g_dbDatabase.Query(SQL_CheckForErrors, "CREATE TABLE IF NOT EXISTS `vip_chat` (`auth` VARCHAR(32) NOT NULL, `tag` VARCHAR(32) NOT NULL, `tag_color` INT(10) NOT NULL DEFAULT 0, `name_color` INT(10) NOT NULL, `chat_color` INT(10) NOT NULL DEFAULT 0, UNIQUE(`auth`))");
+}
+
+void SQL_LoadPlayer(int client)
+{
+	char szQuery[512];
+	FormatEx(szQuery, sizeof(szQuery), "SELECT * FROM `vip_chat` WHERE `auth` = '%s'", g_szAuth[client]);
+	g_dbDatabase.Query(SQL_LoadPlayer_CB, szQuery, GetClientSerial(client));
+}
+
+public void SQL_LoadPlayer_CB(Database db, DBResultSet results, const char[] error, any data)
+{
+	if (!StrEqual(error, ""))
+	{
+		LogError("Databse error, %s", error);
+		return;
+	}
+	
+	int iClient = GetClientFromSerial(data);
+	if (results.FetchRow())
+	{
+		results.FetchString(1, g_szTag[iClient], sizeof(g_szTag)); // starting from 1 because we ignore the auth column
+		
+		for (int i = 0; i < COLOR_TYPES; i++)
+		g_iColors[iClient][i] = results.FetchInt(2 + i);
+	} else {
+		SQL_RegisterPlayer(iClient);
+	}
+}
+
+void SQL_RegisterPlayer(int client)
+{
+	char szQuery[512];
+	FormatEx(szQuery, sizeof(szQuery), "INSERT INTO `vip_chat` (`auth`, `tag`) VALUES ('%s', '')", g_szAuth[client]);
+	g_dbDatabase.Query(SQL_CheckForErrors, szQuery);
+}
+
+public void SQL_CheckForErrors(Database db, DBResultSet results, const char[] error, any data)
+{
+	if (!StrEqual(error, ""))
+	{
+		LogError("Databse error, %s", error);
+		return;
+	}
+}
+
+/* */
