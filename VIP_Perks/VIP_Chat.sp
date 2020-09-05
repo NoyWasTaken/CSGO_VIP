@@ -1,5 +1,5 @@
- // TODO: add the chat processor hook, add sql support, add tag change
-
+ // TODO: add sql support
+ 
 #include <sourcemod>
 #include <chat-processor>
 #include <VIP>
@@ -8,6 +8,7 @@
 #define PLUGIN_VERSION "1.0"
 
 #define COLOR_TYPES 3
+#define MAX_MESSAGE_LENGTH 4096
 
 enum
 {
@@ -52,9 +53,36 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	
+	RegConsoleCmd("sm_tag", Command_Tag, "Change your chat tag");
+	RegConsoleCmd("sm_colors", Command_Colors, "Opens the colors menu");
 }
 
+public void VIP_OnPlayerLoaded(int client)
+{
+	for (int i = 0; i < COLOR_TYPES; i++)
+	g_iColors[client][i] = -1;
+	
+	g_szTag[client][0] = 0;
+}
+
+public Action Command_Tag(int client, int args)
+{
+	if (!client)
+	{
+		PrintToServer("This command is for in-game only.");
+		return Plugin_Handled;
+	}
+	
+	if (!VIP_IsPlayerVIP(client))
+	{
+		ReplyToCommand(client, "%s This command is for vip players only.", PREFIX);
+		return Plugin_Handled;
+	}
+	
+	GetCmdArgString(g_szTag[client], sizeof(g_szTag));
+	PrintToChat(client, "%s You have changed your chat tag to \x02%s\x01.", PREFIX, g_szTag[client]);
+	return Plugin_Handled;
+}
 
 public Action Command_Colors(int client, int args)
 {
@@ -128,6 +156,15 @@ public Action CP_OnChatMessage(int & author, ArrayList recipients, char[] flagst
 {
 	if (VIP_IsPlayerVIP(author))
 	{
+		int iTagColor = g_iColors[author][ColorType_Tag];
+		int iNameColor = g_iColors[author][ColorType_Name];
+		int iChatColor = g_iColors[author][ColorType_Messages];
 		
+		Format(message, MAX_MESSAGE_LENGTH, "%s %s", iChatColor != -1 ? g_szColors[iChatColor][Color_Code]:"", message);
+		Format(name, MAX_NAME_LENGTH, " \x01%s[%s] \x03%s%s\x01", iTagColor != -1 ? g_szColors[iTagColor][Color_Code]:"", !g_szTag[author][0] ? "V.I.P":g_szTag[author], iNameColor != -1 ? g_szColors[iNameColor][Color_Code]:"", name);
+		
+		return Plugin_Changed;
 	}
+	
+	return Plugin_Continue;
 } 

@@ -1,3 +1,5 @@
+// TODO: add sql support
+
 #include <sourcemod>
 #include <cstrike>
 #include <VIP>
