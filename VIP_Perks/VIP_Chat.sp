@@ -1,5 +1,3 @@
- // TODO: add sql support
-
 #include <sourcemod>
 #include <chat-processor>
 #include <VIP>

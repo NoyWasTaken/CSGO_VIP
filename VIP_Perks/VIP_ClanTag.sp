@@ -1,5 +1,3 @@
-// TODO: add sql support
-
 #include <sourcemod>
 #include <cstrike>
 #include <VIP>
@@ -38,6 +36,7 @@ public void VIP_OnPlayerLoaded(int client)
 		return;
 	}
 	
+	g_szTag[client][0] = 0; // reset old data
 	SQL_LoadUser(client);
 }
 
