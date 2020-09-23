@@ -264,7 +264,7 @@ void Menus_ShowPlayer(int client)
 	menu.AddItem("target", szBuffer);
 	
 	Format(szBuffer, sizeof(szBuffer), "Duration: %s days", addCommas(g_iDuration[client]));
-	menu.AddItem("duartion", szBuffer);
+	menu.AddItem("duration", szBuffer);
 	menu.AddItem("add", "Add VIP");
 	
 	menu.ExitBackButton = true;
@@ -399,7 +399,7 @@ void SQL_MakeConnection()
 	if (g_dbDatabase == null)
 		SetFailState("Cannot connect to datbase error: %s", szError);
 	
-	g_dbDatabase.Query(SQL_CheckForErrors, "CREATE TALBE IF NOT EXISTS `vips` (`auth` VARCHAR(32) NOT NULL, `name` VARCHAR(64) NOT NULL, `expiration` INT(10) NOT NULL, UNIQUE(`auth`))");
+	g_dbDatabase.Query(SQL_CheckForErrors, "CREATE TABLE IF NOT EXISTS `vips` (`auth` VARCHAR(32) NOT NULL, `name` VARCHAR(64) NOT NULL, `expiration` INT(10) NOT NULL, UNIQUE(`auth`))");
 }
 
 void SQL_LoadUser(int client)
@@ -413,7 +413,7 @@ public void SQL_LoadUser_CB(Database db, DBResultSet results, const char[] error
 {
 	if (!StrEqual(error, ""))
 	{
-		LogError("Databse error, %s", error);
+		LogError("Database error, %s", error);
 		return;
 	}
 	
@@ -473,7 +473,7 @@ public void SQL_ManageVips(Database db, DBResultSet results, const char[] error,
 {
 	if (!StrEqual(error, ""))
 	{
-		LogError("Databse error, %s", error);
+		LogError("Database error, %s", error);
 		return;
 	}
 	
@@ -505,7 +505,7 @@ public void SQL_FetchVIP(Database db, DBResultSet results, const char[] error, a
 {
 	if (!StrEqual(error, ""))
 	{
-		LogError("Databse error, %s", error);
+		LogError("Database error, %s", error);
 		return;
 	}
 	
@@ -540,7 +540,7 @@ public void SQL_CheckForErrors(Database db, DBResultSet results, const char[] er
 {
 	if (!StrEqual(error, ""))
 	{
-		LogError("Databse error, %s", error);
+		LogError("Database error, %s", error);
 		return;
 	}
 }
