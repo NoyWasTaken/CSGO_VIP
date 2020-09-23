@@ -206,7 +206,7 @@ public void SQL_LoadPlayer_CB(Database db, DBResultSet results, const char[] err
 {
 	if (!StrEqual(error, ""))
 	{
-		LogError("Databse error, %s", error);
+		LogError("Database error, %s", error);
 		return;
 	}
 	
@@ -233,7 +233,7 @@ public void SQL_CheckForErrors(Database db, DBResultSet results, const char[] er
 {
 	if (!StrEqual(error, ""))
 	{
-		LogError("Databse error, %s", error);
+		LogError("Database error, %s", error);
 		return;
 	}
 }
