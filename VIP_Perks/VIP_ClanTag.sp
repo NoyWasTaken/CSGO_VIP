@@ -94,7 +94,7 @@ void SQL_MakeConnection()
 void SQL_LoadUser(int client)
 {
 	char szQuery[512];
-	FormatEx(szQuery, sizeof(szQuery), "SELECT `clantag` FROM `vips_clantags` WHERE `auth` = '%s", g_szAuth[client]);
+	FormatEx(szQuery, sizeof(szQuery), "SELECT `clantag` FROM `vips_clantags` WHERE `auth` = '%s'", g_szAuth[client]);
 	g_dbDatabase.Query(SQL_LoadUser_CB, szQuery, GetClientSerial(client));
 }
 
@@ -102,7 +102,7 @@ public void SQL_LoadUser_CB(Database db, DBResultSet results, const char[] error
 {
 	if (!StrEqual(error, ""))
 	{
-		LogError("Databse error, %s", error);
+		LogError("Database error, %s", error);
 		return;
 	}
 	
@@ -117,7 +117,7 @@ public void SQL_LoadUser_CB(Database db, DBResultSet results, const char[] error
 void SQL_UpdateTag(int client)
 {
 	char szQuery[512];
-	FormatEx(szQuery, sizeof(szQuery), "INSERT INTO `vips_clantags` (`auth`, `clantag`) VALUES ('%s', '%s') ON DUPLICATE KEY UPDATE `clantag` = '%s", g_szAuth[client], g_szTag[client], g_szTag[client]);
+	FormatEx(szQuery, sizeof(szQuery), "INSERT INTO `vips_clantags` (`auth`, `clantag`) VALUES ('%s', '%s') ON DUPLICATE KEY UPDATE `clantag` = '%s'", g_szAuth[client], g_szTag[client], g_szTag[client]);
 	g_dbDatabase.Query(SQL_CheckForErrors, szQuery);
 }
 
@@ -125,7 +125,7 @@ public void SQL_CheckForErrors(Database db, DBResultSet results, const char[] er
 {
 	if (!StrEqual(error, ""))
 	{
-		LogError("Databse error, %s", error);
+		LogError("Database error, %s", error);
 		return;
 	}
 }
