@@ -264,7 +264,7 @@ void Menus_ShowPlayer(int client)
 	menu.AddItem("target", szBuffer);
 	
 	Format(szBuffer, sizeof(szBuffer), "Duration: %s days", addCommas(g_iDuration[client]));
-	menu.AddItem("duartion", szBuffer);
+	menu.AddItem("duration", szBuffer);
 	menu.AddItem("add", "Add VIP");
 	
 	menu.ExitBackButton = true;
