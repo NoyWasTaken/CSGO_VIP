@@ -88,7 +88,7 @@ void SQL_MakeConnection()
 	if (g_dbDatabase == null)
 		SetFailState("Cannot connect to datbase error: %s", szError);
 	
-	g_dbDatabase.Query(SQL_CheckForErrors, "CREATE TABLE IF NOT EXISTS `vips_clantags` (`auth` VARCHAR(32) NOT NULL, `clantag` VARCHAR(64) NOT NULL, UNIQUE(`auth`)");
+	g_dbDatabase.Query(SQL_CheckForErrors, "CREATE TABLE IF NOT EXISTS `vips_clantags` (`auth` VARCHAR(32) NOT NULL, `clantag` VARCHAR(64) NOT NULL, UNIQUE(`auth`))");
 }
 
 void SQL_LoadUser(int client)
