@@ -11,6 +11,7 @@ enum struct Player
 {
 	char auth[32];
 	char name[MAX_NAME_LENGTH];
+	char namePlayer[32];
 	
 	int expiration;
 	
@@ -147,18 +148,18 @@ public Action Command_AddVIP(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	if (args != 2)
+	if (args != 3)
 	{
-		ReplyToCommand(client, "%s Usage: sm_addvip <steamid> <days>", PREFIX);
+		ReplyToCommand(client, "%s Usage: sm_addvip <steamid> <days> <name>", PREFIX);
 		return Plugin_Handled;
 	}
 	
-	char szArg[32], szArg2[10];
+	char szArg[32], szArg2[10], szNamePlayer[32];
 	GetCmdArg(1, szArg, sizeof(szArg));
 	GetCmdArg(2, szArg2, sizeof(szArg2));
+	GetCmdArg(3, szNamePlayer, sizeof(szNamePlayer));
 	
-	Regex rSteam = new Regex("/^STEAM_[0-5]:[01]:\\d+$/");
-	
+	Regex rSteam = new Regex("^STEAM_[0-5]:[0-1]:[0-9]+$");
 	if (rSteam.Match(szArg) != 1)
 	{
 		delete rSteam;
@@ -175,7 +176,7 @@ public Action Command_AddVIP(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	SQL_AddOfflineVIP(szArg, iDuration);
+	SQL_AddOfflineVIP(szArg, iDuration, szNamePlayer);
 	ShowActivity2(client, PREFIX_ACTIVITY, "Gave a vip to \x02\"%s\" \x01for \x04%s \x01days.", szArg, addCommas(iDuration));
 	
 	return Plugin_Handled;
@@ -444,12 +445,13 @@ void SQL_AddVIP(int client)
 	g_dbDatabase.Query(SQL_CheckForErrors, szQuery);
 }
 
-void SQL_AddOfflineVIP(char[] auth, int duration)
+void SQL_AddOfflineVIP(char[] auth, int duration, char[] namePlayer)
 {
 	int iExpiration = GetTime() + (duration * DAY_TO_SECONDS);
 	
 	char szQuery[512];
-	FormatEx(szQuery, sizeof(szQuery), "INSERT INTO `vips` (`auth`, `name`, `expiration`) VALUES ('%s', 'Added Offline', %d) ON DUPLICATE KEY UPDATE `expiration` = %d", auth, iExpiration, iExpiration);
+	FormatEx(szQuery, sizeof(szQuery), "INSERT INTO `vips` (`auth`, `name`, `expiration`) VALUES ('%s', '%s', %d) ON DUPLICATE KEY UPDATE `expiration` = %d", auth, namePlayer, iExpiration, iExpiration);
+	//FormatEx(szQuery, sizeof(szQuery), "INSERT INTO `vips` (`auth`, `name`, `expiration`) VALUES ('%s', 'Added Offline', %d) ON DUPLICATE KEY UPDATE `expiration` = %d", auth, iExpiration, iExpiration);
 	g_dbDatabase.Query(SQL_CheckForErrors, szQuery);
 }
 
